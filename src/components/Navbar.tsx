@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home,
@@ -11,13 +11,18 @@ import {
   Star,
   Gift,
 } from "lucide-react";
-import logoOrchid from "../assets/LogoOrchid.jpeg";
+import { FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 import "../styles/Navbar.css";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +31,25 @@ const Navbar: React.FC = () => {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  // Đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const navVariants = {
@@ -54,35 +78,12 @@ const Navbar: React.FC = () => {
     },
   };
 
-  const logoVariants = {
-    hover: {
-      scale: 1.1,
-      rotate: [0, -5, 5, -5, 0],
-      transition: {
-        duration: 0.6,
-      },
-    },
-  };
-
-  const sparkleVariants = {
-    animate: {
-      scale: [1, 1.2, 1],
-      rotate: [0, 180, 360],
-      opacity: [0.5, 1, 0.5],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut",
-      },
-    },
-  };
-
+  // Thay navItems: bỏ Login nếu đã đăng nhập
   const navItems = [
     { name: "Home", icon: Home, path: "/" },
     { name: "Shop", icon: ShoppingBag, path: "/shop" },
     { name: "Bespoke", icon: Star, path: "/bespoke" },
     { name: "Occasions", icon: Gift, path: "/occasions" },
-    { name: "Login", icon: User, path: "/login" },
   ];
 
   return (
@@ -148,6 +149,61 @@ const Navbar: React.FC = () => {
               </motion.div>
             );
           })}
+
+          {/* Avatar + Logout nếu đã đăng nhập, nếu chưa thì hiện Login */}
+          {isAuthenticated ? (
+            <div className="nav-item profile-dropdown" ref={dropdownRef}>
+              <button
+                className="profile-avatar-btn"
+                onClick={() => setOpen((v) => !v)}
+                title="Trang cá nhân"
+              >
+                {user && (user as any).avatarUrl ? (
+                  <img
+                    src={(user as any).avatarUrl}
+                    alt="avatar"
+                    className="avatar-img"
+                  />
+                ) : (
+                  <FaUserCircle className="avatar-icon" />
+                )}
+              </button>
+              <AnimatePresence>
+                {open && (
+                  <motion.div
+                    className="profile-dropdown-menu"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <Link
+                      to="/profile"
+                      className="dropdown-profile-link"
+                      onClick={() => setOpen(false)}
+                    >
+                      Trang cá nhân
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setOpen(false);
+                        navigate("/login");
+                      }}
+                      className="auth-button logout"
+                    >
+                      <FaSignOutAlt />
+                      <span>Đăng xuất</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <Link to="/login" className="nav-link">
+              <User />
+              <span>Login</span>
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Orchid } from "../types/orchid";
+import type { Orchid } from "../service/orchidService";
 import { formatPrice } from "../utils/formatters";
 import OrchidModal from "./OrchidModal";
 import { Eye, ShoppingBag } from "lucide-react";
@@ -33,8 +33,8 @@ const OrchidCard: React.FC<OrchidCardProps> = ({ orchid, onAddToCart }) => {
             transition={{ duration: 0.4 }}
           >
             <img
-              src={orchid.imageUrl}
-              alt={orchid.name}
+              src={orchid.orchidUrl}
+              alt={orchid.orchidName}
               className="orchid-image"
             />
           </motion.div>
@@ -70,12 +70,12 @@ const OrchidCard: React.FC<OrchidCardProps> = ({ orchid, onAddToCart }) => {
         </div>
 
         <motion.div className="orchid-info">
-          <h3 className="orchid-name">{orchid.name}</h3>
+          <h3 className="orchid-name">{orchid.orchidName}</h3>
           <p className="orchid-price">{formatPrice(orchid.price)} VND</p>
           <p className="orchid-description">
-            {orchid.description.length > 80
-              ? `${orchid.description.substring(0, 80)}...`
-              : orchid.description}
+            {orchid.orchidDescription.length > 80
+              ? `${orchid.orchidDescription.substring(0, 80)}...`
+              : orchid.orchidDescription}
           </p>
         </motion.div>
       </motion.div>

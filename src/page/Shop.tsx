@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Orchid } from "../types/orchid";
 import OrchidCard from "../components/OrchidCard";
-import Logo from "../components/Logo";
 import Cart from "../components/Cart";
 import "../styles/Shop.css";
 import { ShoppingBag } from "lucide-react";
+import { getOrchids } from "../service/orchidService";
+import type { Orchid } from "../service/orchidService";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -22,31 +22,29 @@ const Shop: React.FC = () => {
   >([]);
 
   useEffect(() => {
-    const fetchOrchids = async () => {
+    const fetchOrchidData = async () => {
       try {
-        const response = await fetch(
-          "https://68426af6e1347494c31cbc60.mockapi.io/api/orchid/Orchids"
-        );
-        const data = await response.json();
-        setOrchids(data);
-        setLoading(false);
+        setLoading(true);
+        const data = await getOrchids({ page: 0, size: 100 });
+        setOrchids(data.content || []);
       } catch (error) {
         console.error("Error fetching orchids:", error);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchOrchids();
+    fetchOrchidData();
   }, []);
 
   const handleAddToCart = (orchid: Orchid) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find(
-        (item) => item.orchid.id === orchid.id
+        (item) => item.orchid.orchidId === orchid.orchidId
       );
       if (existingItem) {
         return prevItems.map((item) =>
-          item.orchid.id === orchid.id
+          item.orchid.orchidId === orchid.orchidId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -58,7 +56,7 @@ const Shop: React.FC = () => {
   const handleUpdateQuantity = (orchidId: number, change: number) => {
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.orchid.id === orchidId
+        item.orchid.orchidId === orchidId
           ? { ...item, quantity: Math.max(1, item.quantity + change) }
           : item
       )
@@ -67,21 +65,23 @@ const Shop: React.FC = () => {
 
   const handleRemoveItem = (orchidId: number) => {
     setCartItems((prevItems) =>
-      prevItems.filter((item) => item.orchid.id !== orchidId)
+      prevItems.filter((item) => item.orchid.orchidId !== orchidId)
     );
   };
 
   const filteredAndSortedOrchids = orchids
     .filter(
       (orchid) =>
-        orchid.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        orchid.description.toLowerCase().includes(searchTerm.toLowerCase())
+        orchid.orchidName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        orchid.orchidDescription
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       if (sortBy === "name") {
         return sortOrder === "asc"
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name);
+          ? a.orchidName.localeCompare(b.orchidName)
+          : b.orchidName.localeCompare(a.orchidName);
       } else {
         return sortOrder === "asc" ? a.price - b.price : b.price - a.price;
       }
@@ -203,7 +203,7 @@ const Shop: React.FC = () => {
               <AnimatePresence>
                 {paginatedOrchids.map((orchid) => (
                   <OrchidCard
-                    key={orchid.id}
+                    key={orchid.orchidId}
                     orchid={orchid}
                     onAddToCart={() => handleAddToCart(orchid)}
                   />

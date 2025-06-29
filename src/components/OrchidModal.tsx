@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Orchid } from "../types/orchid";
+import type { Orchid } from "../services/orchidService";
 import { formatPrice } from "../utils/formatters";
 import { Thermometer, Droplets, Sun, Leaf, X, ShoppingBag } from "lucide-react";
 import "../styles/OrchidModal.css";
@@ -48,8 +48,8 @@ const OrchidModal: React.FC<OrchidModalProps> = ({
               transition={{ delay: 0.2 }}
             >
               <img
-                src={orchid.imageUrl}
-                alt={orchid.name}
+                src={orchid.orchidUrl}
+                alt={orchid.orchidName}
                 className="modal-image"
               />
             </motion.div>
@@ -60,12 +60,12 @@ const OrchidModal: React.FC<OrchidModalProps> = ({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <h2 className="modal-title">{orchid.name}</h2>
+              <h2 className="modal-title">{orchid.orchidName}</h2>
               <div className="modal-price">{formatPrice(orchid.price)} VND</div>
 
               <div className="modal-description">
                 <h3>About this Orchid</h3>
-                <p>{orchid.description}</p>
+                <p>{orchid.orchidDescription}</p>
               </div>
 
               <div className="modal-details">

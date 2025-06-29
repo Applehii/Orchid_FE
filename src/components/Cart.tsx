@@ -1,8 +1,11 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { Orchid } from '../types/orchid';
-import { formatPrice } from '../utils/formatters';
-
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import type { Orchid } from "../service/orchidService";
+import { formatPrice } from "../utils/formatters";
+import { Plus, Minus, Trash2 } from "lucide-react";
+import "../styles/Cart.css";
+import { checkout } from "../service/checkoutService";
+import { getAccountIdFromToken } from "../utils/authUtils";
 interface CartProps {
   items: { orchid: Orchid; quantity: number }[];
   isOpen: boolean;
@@ -11,14 +14,17 @@ interface CartProps {
   onRemoveItem: (orchidId: number) => void;
 }
 
-const Cart: React.FC<CartProps> = ({ 
-  items, 
-  isOpen, 
-  onClose, 
+const Cart: React.FC<CartProps> = ({
+  items,
+  isOpen,
+  onClose,
   onUpdateQuantity,
-  onRemoveItem 
+  onRemoveItem,
 }) => {
-  const total = items.reduce((sum, item) => sum + item.orchid.price * item.quantity, 0);
+  const total = items.reduce(
+    (sum, item) => sum + item.orchid.price * item.quantity,
+    0
+  );
 
   if (!isOpen) return null;
 
@@ -33,15 +39,17 @@ const Cart: React.FC<CartProps> = ({
       >
         <motion.div
           className="cart-panel"
-          initial={{ x: '100%' }}
+          initial={{ x: "100%" }}
           animate={{ x: 0 }}
-          exit={{ x: '100%' }}
-          transition={{ type: 'spring', damping: 25 }}
-          onClick={e => e.stopPropagation()}
+          exit={{ x: "100%" }}
+          transition={{ type: "spring", damping: 25 }}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="cart-header">
             <h2>Your Cart 🛒</h2>
-            <button className="cart-close" onClick={onClose}>×</button>
+            <button className="cart-close" onClick={onClose}>
+              ×
+            </button>
           </div>
 
           <div className="cart-items">
@@ -61,36 +69,53 @@ const Cart: React.FC<CartProps> = ({
               <AnimatePresence>
                 {items.map(({ orchid, quantity }) => (
                   <motion.div
-                    key={orchid.id}
+                    key={orchid.orchidId}
                     className="cart-item"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                   >
-                    <img src={orchid.imageUrl} alt={orchid.name} className="cart-item-image" />
-                    <div className="cart-item-details">
-                      <h3>{orchid.name}</h3>
-                      <p className="cart-item-price">{formatPrice(orchid.price)} VND</p>
+                    <div className="cart-item-image-wrapper">
+                      <img
+                        src={orchid.orchidUrl}
+                        alt={orchid.orchidName}
+                        className="cart-item-image"
+                      />
                     </div>
-                    <div className="cart-item-actions">
-                      <div className="quantity-controls">
-                        <button 
-                          onClick={() => onUpdateQuantity(orchid.id, -1)}
-                          disabled={quantity <= 1}
+
+                    <div className="cart-item-details">
+                      <h3>{orchid.orchidName}</h3>
+                      <p className="cart-item-price">
+                        {formatPrice(orchid.price)} VND
+                      </p>
+
+                      <div className="cart-item-actions">
+                        <div className="quantity-controls">
+                          <button
+                            onClick={() =>
+                              onUpdateQuantity(orchid.orchidId, -1)
+                            }
+                            disabled={quantity <= 1}
+                          >
+                            <Minus size={16} />
+                          </button>
+
+                          <span className="quantity-number">{quantity}</span>
+
+                          <button
+                            onClick={() => onUpdateQuantity(orchid.orchidId, 1)}
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </div>
+
+                        <button
+                          className="remove-item"
+                          onClick={() => onRemoveItem(orchid.orchidId)}
                         >
-                          -
-                        </button>
-                        <span>{quantity}</span>
-                        <button onClick={() => onUpdateQuantity(orchid.id, 1)}>
-                          +
+                          <Trash2 size={16} />
                         </button>
                       </div>
-                      <button 
-                        className="remove-item"
-                        onClick={() => onRemoveItem(orchid.id)}
-                      >
-                        🗑️
-                      </button>
                     </div>
                   </motion.div>
                 ))}
@@ -108,6 +133,22 @@ const Cart: React.FC<CartProps> = ({
                 className="checkout-button"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={async () => {
+                  const accountId = getAccountIdFromToken();
+                  if (!accountId) {
+                    alert("You need to login to checkout!");
+                    return;
+                  }
+
+                  try {
+                    await checkout(accountId, items);
+                    alert("Order placed successfully!");
+                    onClose();
+                  } catch (error) {
+                    console.error(error);
+                    alert("Checkout failed!");
+                  }
+                }}
               >
                 Proceed to Checkout
               </motion.button>
@@ -119,4 +160,4 @@ const Cart: React.FC<CartProps> = ({
   );
 };
 
-export default Cart; 
+export default Cart;

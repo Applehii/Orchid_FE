@@ -1,0 +1,33 @@
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quantity-controls button {
+  background: #2c2c2c;
+  color: #fff;
+  border: none;
+  padding: 0.4rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.quantity-controls button:hover {
+  background: #c5a880;
+}
+
+.quantity-number {
+  min-width: 30px;
+  text-align: center;
+  font-size: 1rem;
+  border: 1px solid #c5a880;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  background: #fff;
+  color: #2c2c2c;
+}
