@@ -6,7 +6,7 @@ export interface Category {
 }
 
 export interface Orchid {
-  orchidId: number;  // optional khi tạo mới
+  orchidId: number;
   isNatural: boolean;
   orchidDescription: string;
   orchidName: string;
@@ -44,7 +44,10 @@ export const createOrchid = async (orchid: Orchid): Promise<Orchid> => {
 };
 
 // Cập nhật hoa lan
-export const updateOrchid = async (id: string, orchid: Orchid): Promise<Orchid> => {
+export const updateOrchid = async (
+  id: string,
+  orchid: Orchid
+): Promise<Orchid> => {
   const response = await axios.patch(`${API_BASE_URL}/${id}`, orchid);
   return response.data;
 };

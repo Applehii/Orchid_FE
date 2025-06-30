@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import backgroundImage from "../assets/Background.jpeg";
 import "../styles/Login.css";
 import { useAuth } from "../context/AuthContext";
+import { getRolesFromToken } from "../utils/authUtils";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -41,7 +42,12 @@ const Login: React.FC = () => {
         const result = await login(formData.email, formData.password);
         // Giả sử API trả về tên user ở result.accountName
         setAuthLogin(result?.accountName || formData.email);
-        navigate("/");
+        const roles = getRolesFromToken();
+        if (roles.includes("ADMIN") || roles.includes("SUPER_ADMIN")) {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } else if (formType === "register") {
         if (formData.password !== formData.confirmPassword) {
           throw new Error("Passwords don't match");

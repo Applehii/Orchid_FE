@@ -5,6 +5,8 @@ import Home from "./page/Home";
 import Shop from "./page/Shop";
 import Login from "./page/Login";
 import Admin from "./page/Admin";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Unauthorized from "./page/Unauthorized";
 import "./App.css";
 
 function App() {
@@ -16,7 +18,15 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/401" element={<Unauthorized />} />
         </Routes>
       </div>
     </AuthProvider>

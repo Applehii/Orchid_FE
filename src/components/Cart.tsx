@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Orchid } from "../service/orchidService";
 import { formatPrice } from "../utils/formatters";
@@ -6,6 +6,8 @@ import { Plus, Minus, Trash2 } from "lucide-react";
 import "../styles/Cart.css";
 import { checkout } from "../service/checkoutService";
 import { getAccountIdFromToken } from "../utils/authUtils";
+import Alert from "./Alert";
+
 interface CartProps {
   items: { orchid: Orchid; quantity: number }[];
   isOpen: boolean;
@@ -14,6 +16,7 @@ interface CartProps {
   onRemoveItem: (orchidId: number) => void;
 }
 
+import { useNavigate } from "react-router-dom";
 const Cart: React.FC<CartProps> = ({
   items,
   isOpen,
@@ -21,10 +24,21 @@ const Cart: React.FC<CartProps> = ({
   onUpdateQuantity,
   onRemoveItem,
 }) => {
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const navigate = useNavigate();
+
   const total = items.reduce(
     (sum, item) => sum + item.orchid.price * item.quantity,
     0
   );
+
+  // Reset alert khi cart đóng
+  React.useEffect(() => {
+    if (!isOpen) {
+      setAlertOpen(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -112,6 +126,7 @@ const Cart: React.FC<CartProps> = ({
                         <button
                           className="remove-item"
                           onClick={() => onRemoveItem(orchid.orchidId)}
+                          title="Xóa sản phẩm này"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -136,17 +151,28 @@ const Cart: React.FC<CartProps> = ({
                 onClick={async () => {
                   const accountId = getAccountIdFromToken();
                   if (!accountId) {
-                    alert("You need to login to checkout!");
+                    setAlertMessage("You need to login to checkout!");
+                    setAlertOpen(true);
                     return;
                   }
 
                   try {
                     await checkout(accountId, items);
-                    alert("Order placed successfully!");
-                    onClose();
+                    setAlertMessage("Order placed successfully!");
+                    setAlertOpen(true);
+                    setTimeout(() => {
+                      // Làm mới giỏ hàng bằng cách gọi onRemoveItem cho từng item
+                      items.forEach((item) =>
+                        onRemoveItem(item.orchid.orchidId)
+                      );
+                      onClose();
+                      setAlertOpen(false);
+                      navigate("/shop");
+                    }, 1500);
                   } catch (error) {
                     console.error(error);
-                    alert("Checkout failed!");
+                    setAlertMessage("Checkout failed. Please try again!");
+                    setAlertOpen(true);
                   }
                 }}
               >
@@ -154,6 +180,12 @@ const Cart: React.FC<CartProps> = ({
               </motion.button>
             </div>
           )}
+
+          <Alert
+            isOpen={alertOpen}
+            message={alertMessage}
+            onClose={() => setAlertOpen(false)}
+          />
         </motion.div>
       </motion.div>
     </AnimatePresence>

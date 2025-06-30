@@ -6,11 +6,16 @@ import "../styles/Shop.css";
 import { ShoppingBag } from "lucide-react";
 import { getOrchids } from "../service/orchidService";
 import type { Orchid } from "../service/orchidService";
+import Alert from "../components/Alert";
 
 const ITEMS_PER_PAGE = 10;
 
-const Shop: React.FC = () => {
-  const [orchids, setOrchids] = useState<Orchid[]>([]);
+interface ShopProps {
+  initialOrchids?: Orchid[]; // Dữ liệu có thể truyền vào sẵn hoặc để Shop tự fetch
+}
+
+const Shop: React.FC<ShopProps> = ({ initialOrchids = [] }) => {
+  const [orchids, setOrchids] = useState<Orchid[]>(initialOrchids);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
@@ -20,6 +25,7 @@ const Shop: React.FC = () => {
   const [cartItems, setCartItems] = useState<
     { orchid: Orchid; quantity: number }[]
   >([]);
+  const [alertOpen, setAlertOpen] = useState(false);
 
   useEffect(() => {
     const fetchOrchidData = async () => {
@@ -51,6 +57,7 @@ const Shop: React.FC = () => {
       }
       return [...prevItems, { orchid, quantity: 1 }];
     });
+    setAlertOpen(true);
   };
 
   const handleUpdateQuantity = (orchidId: number, change: number) => {
@@ -209,6 +216,11 @@ const Shop: React.FC = () => {
                   />
                 ))}
               </AnimatePresence>
+              <Alert
+                message="Added to cart successfully!"
+                isOpen={alertOpen}
+                onClose={() => setAlertOpen(false)}
+              />
             </motion.div>
 
             {totalPages > 1 && (

@@ -1,61 +1,65 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
-
-interface Orchid {
-  id: number;
-  name: string;
-  species: string;
-  price: number;
-  stock: number;
-  imageUrl: string;
-}
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import {
+  getOrchids,
+  createOrchid,
+  updateOrchid,
+} from "../../service/orchidService";
+import type { Orchid as OrchidApi } from "../../service/orchidService";
 
 const OrchidManagement: React.FC = () => {
-  const [orchids, setOrchids] = useState<Orchid[]>([
-    { 
-      id: 1, 
-      name: 'Purple Phalaenopsis', 
-      species: 'Phalaenopsis', 
-      price: 29.99, 
-      stock: 15,
-      imageUrl: '/orchid1.jpg'
-    },
-    { 
-      id: 2, 
-      name: 'Pink Cattleya', 
-      species: 'Cattleya', 
-      price: 39.99, 
-      stock: 10,
-      imageUrl: '/orchid2.jpg'
-    },
-  ]);
+  const [orchids, setOrchids] = useState<OrchidApi[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentOrchid, setCurrentOrchid] = useState<Orchid | null>(null);
+  const [currentOrchid, setCurrentOrchid] = useState<OrchidApi | null>(null);
 
   const tableVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const rowVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0 }
+    visible: { opacity: 1, x: 0 },
   };
 
-  const handleEdit = (orchid: Orchid) => {
+  const handleEdit = (orchid: OrchidApi) => {
     setCurrentOrchid(orchid);
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setOrchids(orchids.filter(orchid => orchid.id !== id));
+  const handleDelete = async (id: number) => {
+    // Gọi API xóa ở backend
+    await fetch(`http://localhost:8080/orchids/${id}`, { method: "DELETE" });
+    setOrchids((prev) => prev.filter((orchid) => orchid.orchidId !== id));
   };
+
+  const handleSave = async (orchid: OrchidApi) => {
+    if (orchid.orchidId) {
+      // Update
+      const updated = await updateOrchid(String(orchid.orchidId), orchid);
+      setOrchids((prev) =>
+        prev.map((o) => (o.orchidId === updated.orchidId ? updated : o))
+      );
+    } else {
+      // Add
+      const created = await createOrchid(orchid);
+      setOrchids((prev) => [...prev, created]);
+    }
+    setIsModalOpen(false);
+    setCurrentOrchid(null);
+  };
+
+  useEffect(() => {
+    getOrchids({ page: 0, size: 100 }).then((data) =>
+      setOrchids(data.content || [])
+    );
+  }, []);
 
   return (
     <div className="management-container">
@@ -73,7 +77,6 @@ const OrchidManagement: React.FC = () => {
           <FaPlus /> Add Orchid
         </motion.button>
       </div>
-
       <motion.table
         className="management-table"
         variants={tableVariants}
@@ -84,30 +87,36 @@ const OrchidManagement: React.FC = () => {
           <tr>
             <th>Image</th>
             <th>Name</th>
-            <th>Species</th>
+            <th>Category</th>
             <th>Price</th>
-            <th>Stock</th>
+            <th>Description</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {orchids.map((orchid) => (
             <motion.tr
-              key={orchid.id}
+              key={orchid.orchidId}
               variants={rowVariants}
-              whileHover={{ backgroundColor: 'rgba(155, 77, 255, 0.05)' }}
+              whileHover={{ backgroundColor: "rgba(155, 77, 255, 0.05)" }}
             >
               <td>
-                <img 
-                  src={orchid.imageUrl} 
-                  alt={orchid.name} 
+                <img
+                  src={orchid.orchidUrl}
+                  alt={orchid.orchidName}
                   className="orchid-thumbnail"
+                  style={{
+                    width: 60,
+                    height: 60,
+                    objectFit: "cover",
+                    borderRadius: 8,
+                  }}
                 />
               </td>
-              <td>{orchid.name}</td>
-              <td>{orchid.species}</td>
-              <td>${orchid.price.toFixed(2)}</td>
-              <td>{orchid.stock}</td>
+              <td>{orchid.orchidName}</td>
+              <td>{orchid.category?.categoryName || ""}</td>
+              <td>{orchid.price.toLocaleString()} VND</td>
+              <td>{orchid.orchidDescription}</td>
               <td className="action-buttons">
                 <motion.button
                   className="edit-button"
@@ -121,7 +130,7 @@ const OrchidManagement: React.FC = () => {
                   className="delete-button"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => handleDelete(orchid.id)}
+                  onClick={() => handleDelete(orchid.orchidId)}
                 >
                   <FaTrash />
                 </motion.button>
@@ -145,24 +154,95 @@ const OrchidManagement: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
             >
-              <h3>{currentOrchid ? 'Edit Orchid' : 'Add Orchid'}</h3>
-              {/* Form content will be added later */}
-              <div className="modal-buttons">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  className="save-button"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Save
-                </motion.button>
-              </div>
+              <h3>{currentOrchid ? "Edit Orchid" : "Add Orchid"}</h3>
+              <form
+                className="orchid-modal-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSave(currentOrchid!);
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={currentOrchid?.orchidName || ""}
+                  onChange={(e) =>
+                    setCurrentOrchid((o) => ({
+                      ...o!,
+                      orchidName: e.target.value,
+                    }))
+                  }
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Category ID"
+                  value={currentOrchid?.category?.categoryId || ""}
+                  onChange={(e) =>
+                    setCurrentOrchid((o) => ({
+                      ...o!,
+                      category: {
+                        categoryId: Number(e.target.value),
+                        categoryName: o?.category?.categoryName || "",
+                      },
+                    }))
+                  }
+                  required
+                />
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={currentOrchid?.price || ""}
+                  onChange={(e) =>
+                    setCurrentOrchid((o) => ({
+                      ...o!,
+                      price: Number(e.target.value),
+                    }))
+                  }
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Image URL"
+                  value={currentOrchid?.orchidUrl || ""}
+                  onChange={(e) =>
+                    setCurrentOrchid((o) => ({
+                      ...o!,
+                      orchidUrl: e.target.value,
+                    }))
+                  }
+                  required
+                />
+                <textarea
+                  placeholder="Description"
+                  value={currentOrchid?.orchidDescription || ""}
+                  onChange={(e) =>
+                    setCurrentOrchid((o) => ({
+                      ...o!,
+                      orchidDescription: e.target.value,
+                    }))
+                  }
+                  required
+                />
+                <div className="modal-buttons">
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    className="save-button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="submit"
+                  >
+                    Save
+                  </motion.button>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}
@@ -171,4 +251,4 @@ const OrchidManagement: React.FC = () => {
   );
 };
 
-export default OrchidManagement; 
+export default OrchidManagement;

@@ -1,3 +1,24 @@
+/* Hiển thị nút xóa sản phẩm luôn, căn giữa, nổi bật */
+.remove-item {
+  background: #ffeded;
+  border: none;
+  color: #d32f2f;
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.remove-item:hover {
+  background: #ffbdbd;
+  color: #b71c1c;
+}
+.remove-item svg {
+  display: block;
+}
 .quantity-controls {
   display: flex;
   align-items: center;

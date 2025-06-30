@@ -27,7 +27,7 @@ body {
 }
 
 .admin-header::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -192,7 +192,8 @@ body {
   gap: 0.8rem;
 }
 
-.edit-button, .delete-button {
+.edit-button,
+.delete-button {
   padding: 0.8rem;
   border: none;
   border-radius: 8px;
@@ -285,6 +286,66 @@ body {
   box-shadow: 0 6px 20px rgba(155, 77, 255, 0.3);
 }
 
+/* Orchid Modal Form Styles */
+.orchid-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.orchid-modal-form input,
+.orchid-modal-form textarea {
+  padding: 10px 12px;
+  border: 1px solid #e2d1bc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #faf8f6;
+  color: #333;
+  transition: border 0.2s;
+}
+
+.orchid-modal-form input:focus,
+.orchid-modal-form textarea:focus {
+  border: 1.5px solid #a58d6f;
+  outline: none;
+  background: #fff;
+}
+
+.orchid-modal-form textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.modal-buttons button {
+  min-width: 110px;
+  font-size: 1rem;
+  padding: 10px 0;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.modal-buttons .save-button {
+  background: linear-gradient(90deg, #a58d6f 0%, #a084e8 100%);
+  color: #fff;
+}
+
+.modal-buttons button[type="button"] {
+  background: #222;
+  color: #fff;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .admin-container {
@@ -344,4 +405,4 @@ body {
     flex-direction: column;
     gap: 0.5rem;
   }
-} 
+}
