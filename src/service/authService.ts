@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "./axiosInstance";
 import { setToken, removeToken, getToken } from "./localStorageService";
 
 // Login
@@ -49,5 +49,11 @@ export const refreshAccessToken = async (): Promise<string> => {
 
   const { token } = response.data;
   return token;
+};
+
+// Lấy danh sách order của user hiện tại
+export const getMyOrders = async (): Promise<any[]> => {
+  const response = await axios.get("http://localhost:8080/orders/accounts/me/orders");
+  return response.data;
 };
 

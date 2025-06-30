@@ -8,6 +8,7 @@ import backgroundImage from "../assets/Background.jpeg";
 import "../styles/Login.css";
 import { useAuth } from "../context/AuthContext";
 import { getRolesFromToken } from "../utils/authUtils";
+import Alert from "../components/Alert";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +18,9 @@ const Login: React.FC = () => {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -36,18 +40,23 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+    setSuccess("");
+    setShowError(false);
+    setShowSuccess(false);
     try {
       if (formType === "login") {
         const result = await login(formData.email, formData.password);
-        // Giả sử API trả về tên user ở result.accountName
         setAuthLogin(result?.accountName || formData.email);
+        setSuccess("Đăng nhập thành công!");
+        setShowSuccess(true);
         const roles = getRolesFromToken();
-        if (roles.includes("ADMIN") || roles.includes("SUPER_ADMIN")) {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
+        setTimeout(() => {
+          if (roles.includes("ADMIN") || roles.includes("SUPER_ADMIN")) {
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
+        }, 1000);
       } else if (formType === "register") {
         if (formData.password !== formData.confirmPassword) {
           throw new Error("Passwords don't match");
@@ -58,12 +67,15 @@ const Login: React.FC = () => {
           accountName: formData.accountName,
         };
         await registerUser(userData);
-        setFormType("login");
+        setSuccess("Đăng ký thành công! Vui lòng đăng nhập.");
+        setShowSuccess(true);
+        setTimeout(() => setFormType("login"), 1200);
       }
     } catch (err: any) {
       setError(
         err.response?.data?.message || err.message || "An error occurred"
       );
+      setShowError(true);
     } finally {
       setLoading(false);
     }
@@ -115,7 +127,22 @@ const Login: React.FC = () => {
             exit="exit"
             onSubmit={handleSubmit}
           >
-            {error && <div className="error-message">{error}</div>}
+            {error && (
+              <Alert
+                message={error}
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                duration={3000}
+              />
+            )}
+            {success && (
+              <Alert
+                message={success}
+                isOpen={showSuccess}
+                onClose={() => setShowSuccess(false)}
+                duration={2000}
+              />
+            )}
 
             {formType === "register" && (
               <div className="login-input-group">

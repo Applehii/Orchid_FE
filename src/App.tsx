@@ -5,6 +5,7 @@ import Home from "./page/Home";
 import Shop from "./page/Shop";
 import Login from "./page/Login";
 import Admin from "./page/Admin";
+import Orders from "./page/Orders";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Unauthorized from "./page/Unauthorized";
 import "./App.css";
@@ -27,6 +28,7 @@ function App() {
             }
           />
           <Route path="/401" element={<Unauthorized />} />
+          <Route path="/orders" element={<Orders />} />
         </Routes>
       </div>
     </AuthProvider>

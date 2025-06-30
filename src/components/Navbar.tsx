@@ -183,6 +183,13 @@ const Navbar: React.FC = () => {
                     >
                       Trang cá nhân
                     </Link>
+                    <Link
+                      to="/orders"
+                      className="dropdown-orders-link"
+                      onClick={() => setOpen(false)}
+                    >
+                      Đơn hàng
+                    </Link>
                     <button
                       onClick={() => {
                         logout();
