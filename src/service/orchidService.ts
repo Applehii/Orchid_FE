@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "./axiosInstance";
 
 export interface Category {
   categoryId: number;
@@ -50,4 +50,9 @@ export const updateOrchid = async (
 ): Promise<Orchid> => {
   const response = await axios.patch(`${API_BASE_URL}/${id}`, orchid);
   return response.data;
+};
+
+// Xóa hoa lan
+export const deleteOrchid = async (id: string): Promise<void> => {
+  await axios.delete(`${API_BASE_URL}/${id}`);
 };

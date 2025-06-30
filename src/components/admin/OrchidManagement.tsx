@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { FaEdit, FaPlus } from "react-icons/fa";
 import {
   getOrchids,
   createOrchid,
   updateOrchid,
+  deleteOrchid, // Thêm import hàm xóa
 } from "../../service/orchidService";
 import type { Orchid as OrchidApi } from "../../service/orchidService";
 
@@ -34,8 +35,7 @@ const OrchidManagement: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    // Gọi API xóa ở backend
-    await fetch(`http://localhost:8080/orchids/${id}`, { method: "DELETE" });
+    await deleteOrchid(String(id)); // Gọi hàm xóa FE
     setOrchids((prev) => prev.filter((orchid) => orchid.orchidId !== id));
   };
 
@@ -126,14 +126,7 @@ const OrchidManagement: React.FC = () => {
                 >
                   <FaEdit />
                 </motion.button>
-                <motion.button
-                  className="delete-button"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => handleDelete(orchid.orchidId)}
-                >
-                  <FaTrash />
-                </motion.button>
+                {/* Đã loại bỏ nút xóa */}
               </td>
             </motion.tr>
           ))}
