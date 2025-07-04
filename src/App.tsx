@@ -27,7 +27,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/401" element={<Unauthorized />} />
+          <Route path="/403" element={<Unauthorized />} />
           <Route path="/orders" element={<Orders />} />
         </Routes>
       </div>

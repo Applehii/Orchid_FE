@@ -21,13 +21,13 @@ export const getRolesFromToken = (): string[] => {
     return [];
   }
 };
-export const getAccountIdFromToken = (): number | null => {
+export const getAccountIdFromToken = (): string | null => {
   const token = localStorage.getItem("accessToken");
   if (!token) return null;
 
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    return Number(payload.sub); // Vì backend set accountId vào "subject"
+    return String(payload.sub); // Vì backend set accountId vào "subject"
   } catch (error) {
     console.error("Invalid token", error);
     return null;

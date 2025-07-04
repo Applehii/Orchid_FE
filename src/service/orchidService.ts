@@ -1,12 +1,12 @@
 import axios from "./axiosInstance";
 
 export interface Category {
-  categoryId: number;
+  categoryId: string;
   categoryName: string;
 }
 
 export interface Orchid {
-  orchidId: number;
+  orchidId: string;
   isNatural: boolean;
   orchidDescription: string;
   orchidName: string;

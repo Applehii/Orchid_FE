@@ -12,8 +12,8 @@ interface CartProps {
   items: { orchid: Orchid; quantity: number }[];
   isOpen: boolean;
   onClose: () => void;
-  onUpdateQuantity: (orchidId: number, change: number) => void;
-  onRemoveItem: (orchidId: number) => void;
+  onUpdateQuantity: (orchidId: string, change: number) => void;
+  onRemoveItem: (orchidId: string) => void;
 }
 
 import { useNavigate } from "react-router-dom";

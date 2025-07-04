@@ -2,12 +2,12 @@ import api from "./axiosInstance"; // Import đúng cái instance bạn vừa ch
 import type { Orchid } from "../service/orchidService";
 
 interface CartItem {
-  orchidId: number;
+  orchidId: string;
   quantity: number;
 }
 
 export const checkout = async (
-  accountId: number,
+  accountId: string,
   cartItems: { orchid: Orchid; quantity: number }[]
 ) => {
   const payload: CartItem[] = cartItems.map((item) => ({
